@@ -19,9 +19,9 @@ use solana_transaction_status::{TransactionConfirmationStatus, UiTransactionEnco
 
 use crate::Miner;
 
-const RPC_RETRIES: usize = 0;
+const RPC_RETRIES: usize = 1;
 const SIMULATION_RETRIES: usize = 1;
-const GATEWAY_RETRIES: usize = 1;
+const GATEWAY_RETRIES: usize = 10;
 const CONFIRM_RETRIES: usize = 1;
 
 impl Miner {
@@ -135,7 +135,7 @@ impl Miner {
                         return Ok(sig);
                     }
                     for _ in 0..CONFIRM_RETRIES {
-                        std::thread::sleep(Duration::from_millis(40));
+                        std::thread::sleep(Duration::from_millis(100));
                         match client.get_signature_statuses(&sigs).await {
                             Ok(signature_statuses) => {
                                 println!("Confirms: {:?}", signature_statuses.value);
@@ -178,7 +178,7 @@ impl Miner {
             stdout.flush().ok();
 
             // Retry
-            std::thread::sleep(Duration::from_millis(40));
+            std::thread::sleep(Duration::from_millis(100));
             (hash, slot) = client
                 .get_latest_blockhash_with_commitment(CommitmentConfig::confirmed())
                 .await
